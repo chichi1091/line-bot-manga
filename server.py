@@ -29,9 +29,11 @@ def callback():
 
     try:
         handler.handle(body, signature)
-    except InvalidSignatureError:
+    except InvalidSignatureError as e:
+        print("InvalidSignatureError message:{0}".format(e.message))
         abort(400)
-    except LineBotApiError:
+    except LineBotApiError as e:
+        print("LineBotApiError message:{0}".format(e.message))
         abort(400)
 
     resp = jsonify(success=True)
