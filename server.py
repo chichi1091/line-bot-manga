@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, abort
+from flask import Flask, request, abort, jsonify
 from linebot import (
     LineBotApi, WebhookHandler
 )
@@ -34,7 +34,9 @@ def callback():
     except LineBotApiError:
         abort(400)
 
-    return 'OK'
+    response = jsonify("ok")
+    response.headers['Content-Type'] = 'application/json;charset-UTF-8'
+    return response
 
 
 @handler.add(MessageEvent, message=TextMessage)
