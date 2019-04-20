@@ -34,9 +34,18 @@ def callback():
     except LineBotApiError:
         abort(400)
 
-    response = jsonify("ok")
-    response.headers['Content-Type'] = 'application/json;charset-UTF-8'
-    return response
+    resp = jsonify(success=True)
+    return resp
+
+
+@handler.default()
+def default(event):
+    print(event)
+
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text='サポートされていないテキストメッセージです')
+    )
 
 
 @handler.add(MessageEvent, message=TextMessage)
