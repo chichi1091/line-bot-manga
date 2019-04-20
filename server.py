@@ -4,7 +4,7 @@ from linebot import (
     LineBotApi, WebhookHandler
 )
 from linebot.exceptions import (
-    InvalidSignatureError
+    InvalidSignatureError, LineBotApiError
 )
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
@@ -18,8 +18,10 @@ YOUR_CHANNEL_SECRET = os.environ["YOUR_CHANNEL_SECRET"]
 line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 
+
 @app.route('/callback', methods=['POST'])
 def callback():
+    print("callback start")
     signature = request.headers['HTTP_X_LINE_SIGNATURE']
 
     body = request.get_data(as_text=True)
@@ -28,6 +30,8 @@ def callback():
     try:
         handler.handle(body, signature)
     except InvalidSignatureError:
+        abort(400)
+    except LineBotApiError:
         abort(400)
 
     return 'OK'
