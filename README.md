@@ -14,6 +14,6 @@ $ source env/bin/activate
 (env) $ pip freeze > requirements.txt
 
 (env) $ echo Python 3.7.2 >runtime.txt
-(env) $ echo web: gunicorn app:app --log-file=- > Procfile
+(env) $ echo web: gunicorn server:app --log-file=- > Procfile
 (env) $ touch server.py
 ```

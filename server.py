@@ -1,5 +1,6 @@
 import datetime
 import os
+import urllib.request, urllib.error
 from flask import Flask, request, abort, jsonify
 from linebot import (
     LineBotApi, WebhookHandler
@@ -10,7 +11,6 @@ from linebot.exceptions import (
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
 )
-import urllib2
 from bs4 import BeautifulSoup
 
 app = Flask(__name__)
@@ -25,6 +25,8 @@ url_list = [
     "https://over-lap.co.jp/Form/Product/ProductDetail.aspx?shop=0&pid=ZG0003&vid=&cat=CGS&swrd="
     , "https://over-lap.co.jp/Form/Product/ProductDetail.aspx?shop=0&pid=ZG0022&vid=&cat=CGS&swrd="
 ]
+
+
 @app.route('/callback', methods=['POST'])
 def callback():
     print("callback start")
