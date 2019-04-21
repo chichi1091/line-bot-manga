@@ -9,6 +9,7 @@ $ source env/bin/activate
 (env) $ pip install celery
 (env) $ pip install gunicorn
 (env) $ pip install line-bot-sdk
+(env) $ pip install beautifulsoup4
 
 (env) $ pip freeze > requirements.txt
 
