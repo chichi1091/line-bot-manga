@@ -79,7 +79,7 @@ def handle_message(event):
 
 
 def scraping(url):
-    html = urllib2.urlopen(url)
+    html = urllib.request.urlopen(url)
     soup = BeautifulSoup(html, "html.parser")
 
     title = soup.title.string
