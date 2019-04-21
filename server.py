@@ -11,7 +11,7 @@ from linebot.exceptions import (
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
 )
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
 app = Flask(__name__)
 
@@ -85,15 +85,13 @@ def scraping(url):
     title = soup.title.string
 
     div_tag = soup.find(id="ctl00_ContentPlaceHolder1_thisnumber")
-    for tag in div_tag:
-        clazz = tag.get("class").pop(0)
-        if clazz == "limit":
-            string_ = tag.string
-            term = string_.split(":")[1].split("－")
-            start = datetime.datetime.strptime(term[0], '%Y.%m.%d')
-            
-            if datetime.Now <= start:
-                return title
+    inner_div_tag = div_tag.find_all("div")
+    string_ = inner_div_tag[1].string
+    term = string_.replace("掲載期間：", "").replace("\r\n", "").split("－")
+    start = datetime.datetime.strptime(term[0], '%Y.%m.%d')
+    
+    if datetime.datetime.now() <= start:
+        return title
     
     return None
 
@@ -101,3 +99,4 @@ def scraping(url):
 if __name__ == '__main__':
     port = int(os.getenv("PORT"))
     app.run(host="0.0.0.0", port=port)
+
