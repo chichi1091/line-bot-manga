@@ -1,5 +1,7 @@
 import datetime
 import os
+import requests
+import json
 import urllib.request, urllib.error
 from flask import Flask, request, abort, jsonify
 from linebot import (
@@ -11,12 +13,15 @@ from linebot.exceptions import (
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
 )
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup
+from celery.task import periodic_task
+from celery.schedules import crontab
 
 app = Flask(__name__)
 
 YOUR_CHANNEL_ACCESS_TOKEN = os.environ["YOUR_CHANNEL_ACCESS_TOKEN"]
 YOUR_CHANNEL_SECRET = os.environ["YOUR_CHANNEL_SECRET"]
+YOUR_USER_ID = os.environ["YOUR_USER_ID"]
 
 line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(YOUR_CHANNEL_SECRET)
@@ -60,6 +65,32 @@ def default(event):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    message = create_message()
+        
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=message))
+
+
+@periodic_task(run_every=crontab(minute="0", hour="0"))
+def task():
+    message = create_message()
+
+    post_date = {
+        "to": YOUR_USER_ID
+        , "message": {
+            "type": "text"
+            , "text": message
+        }
+    }
+    headers = {
+        "Content-Type" : "application/json; charset=UTF-8"
+        , "Authorization": "Bearer " + YOUR_CHANNEL_ACCESS_TOKEN
+    }
+    requests.post("https://api.line.me/v2/bot/message/push", data=json.dumps(post_date), headers=headers)
+
+
+def create_message():
     titles = ""
     for url in url_list:
         title = scraping(url)
@@ -67,15 +98,12 @@ def handle_message(event):
             if titles != "": titles += ","
             titles += title.replace("｜コミックガルド作品一覧", "")
 
-    message = ""        
+    message = ""
     if titles == "":
         message = "更新はありません"
     else:
         message += titles + "が更新されています"
-        
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=message))
+    return message
 
 
 def scraping(url):
